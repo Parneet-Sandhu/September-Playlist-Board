@@ -1,53 +1,77 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-import { Platform } from 'react-native';
-
-const tintColorLight = '#0a7ea4';
+const tintColorLight = '#2f95dc';
 const tintColorDark = '#fff';
 
-export const Colors = {
+export default {
   light: {
-    text: '#11181C',
+    text: '#000',
     background: '#fff',
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    tabIconDefault: '#ccc',
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: '#fff',
+    background: '#000',
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    tabIconDefault: '#ccc',
     tabIconSelected: tintColorDark,
   },
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+export const moodColors = {
+  happy: '#FFD700',
+  cozy: '#FF8C00',
+  chill: '#9370DB',
+  sad: '#4682B4'
+} as const; 
+
+export const pixelTheme = {
+  fonts: {
+    pixel: 'PressStart2P',
   },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+  colors: {
+    happy: '#FFE664', // Warmer pixel yellow
+    cozy: '#FF9C57', // Warmer pixel orange
+    chill: '#B39DDB', // Softer pixel purple
+    sad: '#81D4FA', // Brighter pixel blue
+    background: '#FFF5E6', // Warm background
+    border: '#2A2A2A', // Dark pixel borders
   },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+  }
+};
+
+export const septemberThemes = {
+  autumn: {
+    image: require('../assets/images/themes/autumn-pixel.jpg'),
+    name: 'Autumn Lake',
+    description: 'Peaceful lake with fall colors',
+    colors: { primary: '#FFB74D' }
   },
-});
+  lake: {
+    image: require('../assets/images/themes/rainy-pixel.jpg'),
+    name: 'Rainy Day',
+    description: 'Cozy rainy afternoon',
+    colors: { primary: '#81D4FA' }
+  },
+  mountain: {
+    image: require('../assets/images/themes/study-pixel.jpg'),
+    name: 'Mountain Study',
+    description: 'Quiet study spot in the mountains',
+    colors: { primary: '#B39DDB' }
+  },
+  sunset: {
+    image: require('../assets/images/themes/sunset-pixel.jpg'),
+    name: 'September Sunset',
+    description: 'Warm evening vibes',
+    colors: { primary: '#FFE082' }
+  },
+} as const;
+
+export type ThemeId = keyof typeof septemberThemes;
+
