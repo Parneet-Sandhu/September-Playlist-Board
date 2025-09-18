@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { 
   View, 
   TextInput, 
@@ -7,11 +7,15 @@ import {
   Animated, 
   TouchableOpacity,
   Linking,
-  Alert
+  Alert,
+  Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { moodColors } from '../constants/theme';
 import { pixelTheme } from '../constants/theme';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export type MoodType = keyof typeof moodColors;
 
@@ -26,6 +30,7 @@ export interface Note {
   };
   youtubeUrl?: string;
   spotifyUrl?: string;
+  previewUrl?: string;
 }
 
 interface StickyNoteProps {
@@ -40,9 +45,15 @@ export default function StickyNote({ note, onUpdate, onDelete }: StickyNoteProps
   const opacity = useRef(new Animated.Value(1)).current;
   const [isEditing, setIsEditing] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
   
   const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => !isEditing,
+    onStartShouldSetPanResponder: () => false,
+    onStartShouldSetPanResponderCapture: () => false,
+    onMoveShouldSetPanResponder: (_evt, gestureState) => !isEditing && (Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2),
+    onMoveShouldSetPanResponderCapture: (_evt, gestureState) => !isEditing && (Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2),
+    onPanResponderTerminationRequest: () => false,
     onPanResponderGrant: () => {
       setShowActions(false);
       Animated.parallel([
@@ -61,11 +72,8 @@ export default function StickyNote({ note, onUpdate, onDelete }: StickyNoteProps
       { useNativeDriver: false }
     ),
     onPanResponderRelease: () => {
-      let newX = 0;
-      let newY = 0;
-      
-      newX = (pan.x as any).__getValue();
-      newY = (pan.y as any).__getValue();
+      const deltaX = (pan.x as any).__getValue();
+      const deltaY = (pan.y as any).__getValue();
 
       Animated.parallel([
         Animated.spring(scale, {
@@ -78,12 +86,14 @@ export default function StickyNote({ note, onUpdate, onDelete }: StickyNoteProps
         }),
       ]).start();
 
+      const maxX = Math.max(0, SCREEN_WIDTH - 200); // approx note width + padding
+      const maxY = Math.max(0, SCREEN_HEIGHT - 300); // account for header/controls
+      const nextX = Math.max(0, Math.min(maxX, deltaX + note.position.x));
+      const nextY = Math.max(0, Math.min(maxY, deltaY + note.position.y));
+
       onUpdate({
         ...note,
-        position: {
-          x: Math.max(0, Math.min(300, newX + note.position.x)),
-          y: Math.max(0, Math.min(500, newY + note.position.y))
-        }
+        position: { x: nextX, y: nextY }
       });
       pan.setValue({ x: 0, y: 0 });
     }
@@ -123,6 +133,47 @@ export default function StickyNote({ note, onUpdate, onDelete }: StickyNoteProps
     }
   };
 
+  const handlePlayPause = async () => {
+    try {
+      if (!note.previewUrl) return;
+      if (!soundRef.current) {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: note.previewUrl },
+          { shouldPlay: true }
+        );
+        soundRef.current = sound;
+        setIsPlaying(true);
+        sound.setOnPlaybackStatusUpdate((status: any) => {
+          if (status.isLoaded) {
+            setIsPlaying(status.isPlaying ?? false);
+          }
+        });
+      } else {
+        const status = await soundRef.current.getStatusAsync();
+        if (status.isLoaded) {
+          if ((status as any).isPlaying) {
+            await soundRef.current.pauseAsync();
+            setIsPlaying(false);
+          } else {
+            await soundRef.current.playAsync();
+            setIsPlaying(true);
+          }
+        }
+      }
+    } catch (e) {
+      Alert.alert('Playback error', 'Unable to play preview');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <Animated.View
       {...panResponder.panHandlers}
@@ -143,28 +194,26 @@ export default function StickyNote({ note, onUpdate, onDelete }: StickyNoteProps
       ]}
     >
       {/* Action Buttons */}
-      {showActions && (
-        <View style={styles.actionButtons}>
+      <View style={styles.actionButtons}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.editButton]}
+          onPress={() => setIsEditing(!isEditing)}
+        >
+          <Ionicons 
+            name={isEditing ? "checkmark" : "create-outline"} 
+            size={14} 
+            color="#FFF" 
+          />
+        </TouchableOpacity>
+        {showActions && onDelete && (
           <TouchableOpacity
-            style={[styles.actionButton, styles.editButton]}
-            onPress={() => setIsEditing(!isEditing)}
+            style={[styles.actionButton, styles.deleteButton]}
+            onPress={onDelete}
           >
-            <Ionicons 
-              name={isEditing ? "checkmark" : "create-outline"} 
-              size={14} 
-              color="#FFF" 
-            />
+            <Ionicons name="trash-outline" size={14} color="#FFF" />
           </TouchableOpacity>
-          {onDelete && (
-            <TouchableOpacity
-              style={[styles.actionButton, styles.deleteButton]}
-              onPress={onDelete}
-            >
-              <Ionicons name="trash-outline" size={14} color="#FFF" />
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
+        )}
+      </View>
 
       {/* Main Content */}
       <View style={styles.noteContent}>
@@ -223,9 +272,17 @@ export default function StickyNote({ note, onUpdate, onDelete }: StickyNoteProps
           </View>
         )}
 
-        {/* Play Buttons - show when URLs are available and not editing */}
-        {!isEditing && (note.youtubeUrl || note.spotifyUrl) && (
+        {/* Play Buttons - show when URLs or preview are available and not editing */}
+        {!isEditing && (note.previewUrl || note.youtubeUrl || note.spotifyUrl) && (
           <View style={styles.playButtons}>
+            {note.previewUrl && (
+              <TouchableOpacity
+                style={[styles.playButton, styles.previewButton]}
+                onPress={handlePlayPause}
+              >
+                <Ionicons name={isPlaying ? 'pause' : 'play'} size={16} color="#FFF" />
+              </TouchableOpacity>
+            )}
             {note.youtubeUrl && isValidUrl(note.youtubeUrl) && (
               <TouchableOpacity
                 style={[styles.playButton, styles.youtubeButton]}
@@ -328,6 +385,9 @@ const styles = StyleSheet.create({
   },
   spotifyButton: {
     backgroundColor: '#1DB954',
+  },
+  previewButton: {
+    backgroundColor: '#3F51B5',
   },
   actionButtons: {
     position: 'absolute',
