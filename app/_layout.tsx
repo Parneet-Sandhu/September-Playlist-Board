@@ -1,10 +1,21 @@
 import { Stack } from 'expo-router';
-import { useFonts, PressStart2P_400Regular } from '@expo-google-fonts/press-start-2p';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    'PressStart2P': PressStart2P_400Regular,
+    'PressStart2P': require('../assets/fonts/PressStart2P-Regular.ttf'),
   });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
     return null;

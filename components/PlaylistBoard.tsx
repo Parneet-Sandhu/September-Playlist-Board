@@ -7,27 +7,103 @@ import {
   ScrollView, 
   Image, 
   Modal,
-  Dimensions 
+  Dimensions,
+  Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { pixelTheme, septemberThemes } from '../constants/theme';
+import { pixelTheme } from '../constants/theme';
 import StickyNote, { Note, MoodType } from './StickyNote';
 
-// Direct image imports
-const autumnImage = require('../assets/images/themes/autumn-pixel.jpg');
-const rainyImage = require('../assets/images/themes/rainy-pixel.jpg');
-const studyImage = require('../assets/images/themes/study-pixel.jpg');
-const sunsetImage = require('../assets/images/themes/sunset-pixel.jpg');
-
-// Map theme keys to direct image imports
-const themeImages = {
-  autumn: autumnImage,
-  lake: rainyImage,
-  mountain: studyImage,
-  sunset: sunsetImage
+// Updated image imports with fallback handling - matching your actual files
+const getImageSource = (imageName: string) => {
+  try {
+    switch(imageName) {
+      case 'autumn-pixel':
+        return require('../assets/images/themes/autumn-pixel.jpg');
+      case 'rainy-pixel':
+        return require('../assets/images/themes/rainy-pixel.jpg');
+      case 'study-pixel':
+        return require('../assets/images/themes/study-pixel.jpg');
+      case 'sunset-pixel':
+        return require('../assets/images/themes/sunset-pixel.jpg');
+      case 'coffee-pixel':
+        return require('../assets/images/themes/coffee-pixel.jpg');
+      case 'cozy-room-pixel':
+        return require('../assets/images/themes/cozy-room-pixel.jpg');
+      case 'dorm-pixel':
+        return require('../assets/images/themes/dorm-pixel.jpg');
+      case 'library-pixel':
+        return require('../assets/images/themes/library-pixel.jpg');
+      default:
+        return null;
+    }
+  } catch (error) {
+    console.log(`Image ${imageName} not found, using fallback`);
+    return null;
+  }
 };
 
-type ThemeKey = keyof typeof septemberThemes;
+// Enhanced theme configuration - matching all your available images
+const enhancedSeptemberThemes = {
+  autumn: {
+    name: 'Golden Autumn',
+    description: 'Crisp leaves and warm sunlight',
+    image: 'autumn-pixel',
+    backgroundColor: '#FFF4E6',
+    accent: '#D2691E'
+  },
+  rainy: {
+    name: 'Rainy Study Day',
+    description: 'Cozy indoor vibes with raindrops',
+    image: 'rainy-pixel',
+    backgroundColor: '#E6F3FF',
+    accent: '#4682B4'
+  },
+  sunset: {
+    name: 'September Sunset',
+    description: 'Golden hour magic',
+    image: 'sunset-pixel',
+    backgroundColor: '#FFF0E6',
+    accent: '#FF6347'
+  },
+  study: {
+    name: 'Late Night Study',
+    description: 'Focused midnight sessions',
+    image: 'study-pixel',
+    backgroundColor: '#F0E6FF',
+    accent: '#9370DB'
+  },
+  coffee: {
+    name: 'Coffee Shop',
+    description: 'Warm lattes and lo-fi beats',
+    image: 'coffee-pixel',
+    backgroundColor: '#F4E4BC',
+    accent: '#8B4513'
+  },
+  cozyRoom: {
+    name: 'Cozy Bedroom',
+    description: 'Warm blankets and fairy lights',
+    image: 'cozy-room-pixel',
+    backgroundColor: '#FFE6E6',
+    accent: '#CD5C5C'
+  },
+  dorm: {
+    name: 'Dorm Room',
+    description: 'College vibes and late nights',
+    image: 'dorm-pixel',
+    backgroundColor: '#E6E6FA',
+    accent: '#6A5ACD'
+  },
+  library: {
+    name: 'Quiet Library',
+    description: 'Peaceful reading corner',
+    image: 'library-pixel',
+    backgroundColor: '#E6F0E6',
+    accent: '#228B22'
+  }
+};
+
+type ThemeKey = keyof typeof enhancedSeptemberThemes;
 
 interface PlaylistBoardProps {
   notes: Note[];
@@ -36,11 +112,22 @@ interface PlaylistBoardProps {
   setCurrentMood: (mood: MoodType) => void;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Sample September-coded song suggestions
+const septemberSongSuggestions = [
+  { title: "Wake Me Up When September Ends", artist: "Green Day", mood: "sad" as MoodType },
+  { title: "September", artist: "Earth, Wind & Fire", mood: "happy" as MoodType },
+  { title: "All Too Well", artist: "Taylor Swift", mood: "sad" as MoodType },
+  { title: "Autumn Leaves", artist: "Nat King Cole", mood: "cozy" as MoodType },
+  { title: "October", artist: "Broken Bells", mood: "chill" as MoodType },
+  { title: "Harvest Moon", artist: "Neil Young", mood: "cozy" as MoodType }
+];
 
 export default function PlaylistBoard({ notes, setNotes, currentMood, setCurrentMood }: PlaylistBoardProps) {
   const [selectedTheme, setSelectedTheme] = useState<ThemeKey>('autumn');
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showSongSuggestions, setShowSongSuggestions] = useState(false);
 
   const handleAddNote = () => {
     const newNote: Note = {
@@ -48,9 +135,21 @@ export default function PlaylistBoard({ notes, setNotes, currentMood, setCurrent
       title: '',
       lyrics: '',
       mood: currentMood,
-      position: { x: 50, y: 50 }
+      position: { x: Math.random() * 200 + 50, y: Math.random() * 200 + 50 }
     };
     setNotes([...notes, newNote]);
+  };
+
+  const handleAddSuggestedSong = (song: typeof septemberSongSuggestions[0]) => {
+    const newNote: Note = {
+      id: Date.now().toString(),
+      title: `${song.title} - ${song.artist}`,
+      lyrics: 'Add your favorite lyrics here...',
+      mood: song.mood,
+      position: { x: Math.random() * 200 + 50, y: Math.random() * 200 + 50 }
+    };
+    setNotes([...notes, newNote]);
+    setShowSongSuggestions(false);
   };
 
   const handleUpdateNote = (updatedNote: Note) => {
@@ -60,31 +159,96 @@ export default function PlaylistBoard({ notes, setNotes, currentMood, setCurrent
     setNotes(updatedNotes);
   };
 
+  const handleDeleteNote = (noteId: string) => {
+    setNotes(notes.filter(note => note.id !== noteId));
+  };
+
   const validMoods = Object.keys(pixelTheme.colors).filter(
     (key): key is MoodType => key !== 'background' && key !== 'border'
   );
 
+  const currentTheme = enhancedSeptemberThemes[selectedTheme];
+  const imageSource = getImageSource(currentTheme.image);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: currentTheme.backgroundColor }]}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.title}>Hello September</Text>
-          <TouchableOpacity 
-            onPress={() => setShowThemeModal(true)}
-            style={[styles.settingsButton, styles.pixelBorder]}
-          >
-            <Ionicons name="images-outline" size={24} color={pixelTheme.colors.border} />
-          </TouchableOpacity>
+          <View>
+            <Text style={styles.title}>Hello September</Text>
+            <Text style={styles.subtitle}>{currentTheme.name}</Text>
+          </View>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity 
+              onPress={() => setShowSongSuggestions(true)}
+              style={[styles.headerButton, styles.pixelBorder, { backgroundColor: currentTheme.accent }]}
+            >
+              <Ionicons name="musical-notes" size={20} color="#FFF" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => setShowThemeModal(true)}
+              style={[styles.headerButton, styles.pixelBorder]}
+            >
+              <Ionicons name="images-outline" size={20} color={pixelTheme.colors.border} />
+            </TouchableOpacity>
+          </View>
         </View>
+        
         <View style={[styles.imageContainer, styles.pixelBorder]}>
-          <Image 
-            source={themeImages[selectedTheme]}
-            style={[styles.themeImage, styles.imageWithBorder]}
-            resizeMode="cover"
-          />
+          {imageSource ? (
+            <Image 
+              source={imageSource}
+              style={styles.themeImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={[styles.fallbackImage, { backgroundColor: currentTheme.accent }]}>
+              <Text style={styles.fallbackText}>{currentTheme.name}</Text>
+            </View>
+          )}
         </View>
       </View>
 
+      {/* Song Suggestions Modal */}
+      <Modal
+        visible={showSongSuggestions}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowSongSuggestions(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, styles.pixelBorder]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>September Songs</Text>
+              <TouchableOpacity 
+                onPress={() => setShowSongSuggestions(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color={pixelTheme.colors.border} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.suggestionsList} showsVerticalScrollIndicator={false}>
+              {septemberSongSuggestions.map((song, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.songSuggestion,
+                    styles.pixelBorder,
+                    { backgroundColor: pixelTheme.colors[song.mood] }
+                  ]}
+                  onPress={() => handleAddSuggestedSong(song)}
+                >
+                  <Text style={styles.songTitle}>{song.title}</Text>
+                  <Text style={styles.songArtist}>{song.artist}</Text>
+                  <Text style={styles.songMood}>{song.mood.toUpperCase()}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Theme Selection Modal */}
       <Modal
         visible={showThemeModal}
         transparent={true}
@@ -102,43 +266,61 @@ export default function PlaylistBoard({ notes, setNotes, currentMood, setCurrent
                 <Ionicons name="close" size={24} color={pixelTheme.colors.border} />
               </TouchableOpacity>
             </View>
-            <ScrollView style={styles.themeList}>
-              {Object.entries(septemberThemes).map(([key, theme]) => (
-                <TouchableOpacity
-                  key={key}
-                  style={[
-                    styles.themeOption,
-                    styles.pixelBorder,
-                    selectedTheme === key && styles.selectedTheme
-                  ]}
-                  onPress={() => {
-                    setSelectedTheme(key as ThemeKey);
-                    setShowThemeModal(false);
-                  }}
-                >
-                  <Image 
-                    source={themeImages[key as keyof typeof themeImages]}
-                    style={[styles.themeOptionImage, styles.imageWithBorder]}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.themeInfo}>
-                    <Text style={styles.themeName}>{theme.name}</Text>
-                    <Text style={styles.themeDescription}>{theme.description}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
+            <ScrollView style={styles.themeList} showsVerticalScrollIndicator={false}>
+              {Object.entries(enhancedSeptemberThemes).map(([key, theme]) => {
+                const themeImageSource = getImageSource(theme.image);
+                return (
+                  <TouchableOpacity
+                    key={key}
+                    style={[
+                      styles.themeOption,
+                      styles.pixelBorder,
+                      selectedTheme === key && styles.selectedTheme
+                    ]}
+                    onPress={() => {
+                      setSelectedTheme(key as ThemeKey);
+                      setShowThemeModal(false);
+                    }}
+                  >
+                    {themeImageSource ? (
+                      <Image 
+                        source={themeImageSource}
+                        style={styles.themeOptionImage}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={[styles.themeOptionImage, { backgroundColor: theme.accent }]}>
+                        <Text style={styles.fallbackThemeText}>{theme.name}</Text>
+                      </View>
+                    )}
+                    <View style={styles.themeInfo}>
+                      <Text style={styles.themeName}>{theme.name}</Text>
+                      <Text style={styles.themeDescription}>{theme.description}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
           </View>
         </View>
       </Modal>
 
       <View style={styles.controls}>
-        <TouchableOpacity 
-          style={[styles.addButton, styles.pixelBorder]}
-          onPress={handleAddNote}
-        >
-          <Text style={styles.buttonText}>+ ADD SONG</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity 
+            style={[styles.addButton, styles.pixelBorder, { backgroundColor: currentTheme.accent }]}
+            onPress={handleAddNote}
+          >
+            <Text style={styles.buttonText}>+ ADD SONG</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.clearButton, styles.pixelBorder]}
+            onPress={() => setNotes([])}
+          >
+            <Text style={[styles.buttonText, { color: pixelTheme.colors.border }]}>CLEAR ALL</Text>
+          </TouchableOpacity>
+        </View>
 
         <ScrollView 
           horizontal 
@@ -164,13 +346,25 @@ export default function PlaylistBoard({ notes, setNotes, currentMood, setCurrent
       </View>
 
       <View style={styles.notesContainer}>
-        {notes.map(note => (
-          <StickyNote
-            key={note.id}
-            note={note}
-            onUpdate={handleUpdateNote}
-          />
-        ))}
+        {notes.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>
+              🎵 Your September playlist is empty
+            </Text>
+            <Text style={styles.emptyStateSubtext}>
+              Add some songs to get started!
+            </Text>
+          </View>
+        ) : (
+          notes.map(note => (
+            <StickyNote
+              key={note.id}
+              note={note}
+              onUpdate={handleUpdateNote}
+              onDelete={() => handleDeleteNote(note.id)}
+            />
+          ))
+        )}
       </View>
     </View>
   );
@@ -179,7 +373,6 @@ export default function PlaylistBoard({ notes, setNotes, currentMood, setCurrent
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: pixelTheme.colors.background,
   },
   header: {
     paddingTop: 60,
@@ -197,7 +390,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: pixelTheme.colors.border,
   },
-  settingsButton: {
+  subtitle: {
+    fontFamily: pixelTheme.fonts.pixel,
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  headerButton: {
     padding: pixelTheme.spacing.sm,
     backgroundColor: '#FFF',
   },
@@ -211,6 +414,24 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  fallbackImage: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fallbackText: {
+    fontFamily: pixelTheme.fonts.pixel,
+    fontSize: 16,
+    color: '#FFF',
+    textAlign: 'center',
+  },
+  fallbackThemeText: {
+    fontFamily: pixelTheme.fonts.pixel,
+    fontSize: 12,
+    color: '#FFF',
+    textAlign: 'center',
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -219,9 +440,10 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: SCREEN_WIDTH * 0.9,
-    maxHeight: '80%',
+    maxHeight: SCREEN_HEIGHT * 0.8,
     backgroundColor: '#FFF',
     padding: pixelTheme.spacing.md,
+    alignSelf: 'center',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -237,8 +459,32 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: pixelTheme.spacing.xs,
   },
+  suggestionsList: {
+    maxHeight: SCREEN_HEIGHT * 0.6,
+  },
+  songSuggestion: {
+    padding: pixelTheme.spacing.md,
+    marginBottom: pixelTheme.spacing.sm,
+  },
+  songTitle: {
+    fontFamily: pixelTheme.fonts.pixel,
+    fontSize: 14,
+    color: pixelTheme.colors.border,
+    marginBottom: 4,
+  },
+  songArtist: {
+    fontFamily: pixelTheme.fonts.pixel,
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  songMood: {
+    fontFamily: pixelTheme.fonts.pixel,
+    fontSize: 10,
+    color: '#999',
+  },
   themeList: {
-    flex: 1,
+    maxHeight: SCREEN_HEIGHT * 0.6,
   },
   themeOption: {
     marginBottom: pixelTheme.spacing.md,
@@ -248,11 +494,8 @@ const styles = StyleSheet.create({
   themeOptionImage: {
     width: '100%',
     height: 120,
-    backgroundColor: '#e0e0e0', // Light gray background as fallback
-  },
-  imageWithBorder: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   themeInfo: {
     padding: pixelTheme.spacing.md,
@@ -276,11 +519,20 @@ const styles = StyleSheet.create({
   controls: {
     padding: pixelTheme.spacing.md,
   },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: pixelTheme.spacing.sm,
+    marginBottom: pixelTheme.spacing.md,
+  },
   addButton: {
-    backgroundColor: pixelTheme.colors.border,
+    flex: 1,
     padding: pixelTheme.spacing.md,
     alignItems: 'center',
-    marginBottom: pixelTheme.spacing.md,
+  },
+  clearButton: {
+    padding: pixelTheme.spacing.md,
+    paddingHorizontal: pixelTheme.spacing.lg,
+    backgroundColor: '#FFF',
   },
   buttonText: {
     fontFamily: pixelTheme.fonts.pixel,
@@ -316,5 +568,23 @@ const styles = StyleSheet.create({
   notesContainer: {
     flex: 1,
     padding: pixelTheme.spacing.md,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    fontFamily: pixelTheme.fonts.pixel,
+    fontSize: 16,
+    color: pixelTheme.colors.border,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptyStateSubtext: {
+    fontFamily: pixelTheme.fonts.pixel,
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
   }
 });
