@@ -90,8 +90,8 @@ const enhancedSeptemberThemes = {
     accent: '#CD5C5C'
   },
   dorm: {
-    name: 'Dorm Room',
-    description: 'College vibes and late nights',
+    name: 'Alpine Glow',
+    description: 'Mountain retreat vibes',
     image: 'dorm-pixel',
     backgroundColor: '#E6E6FA',
     accent: '#6A5ACD'
