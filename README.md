@@ -1,50 +1,62 @@
-# Welcome to your Expo app 👋
+# 🎧 Pixel September Playlist Note 🍂✨  
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Hi! I’m Parneet Sandhu, and this is my submission for the **September 2025: Vibe Coding Challenge**.  
 
-## Get started
+The idea came when I was listening to **Taylor Swift’s “September”** and thought: *what if moods could be pinned down like sticky notes… but with music?*  
+So I built **Pixel September Playlist Note** — a cozy app where songs, moods, and quotes live together in a cute pixel theme.  
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## App Screenshots
+<img src="https://github.com/user-attachments/assets/6460a610-a06c-4bb6-9879-0b4122821e74" width="200" />
+<img src="https://github.com/user-attachments/assets/fe173d69-64fd-42af-9371-0ea91a771272" width="200" />
+<img src="https://github.com/user-attachments/assets/7385d488-5088-4901-8afb-794d1bf9385a" width="200" />
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## 🌟 Features  
 
-In the output, you'll find options to open the app in a
+- **Add Songs** – Through the Add Song button or the top-right music icon.  
+- **Choose Themes** – Pixel vibes like *Sunset*, *Alpine Glow*, and *Coffee Shop*.  
+- **Mood Colors** – Songs appear as sticky notes with different colors.  
+- **Daily Quotes** – Every day a fresh September-inspired quote appears.  
+- **Clear All** – Start fresh anytime.  
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🛠 Tech Stack  
 
-## Get a fresh project
+- **React Expo** (frontend framework)  
+- **TypeScript** (for type safety + cleaner code)  
+- **Pixel-inspired design** for cozy, Gen Z aesthetics  
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## 🤖 How I Used GitHub Copilot  
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Since this challenge was about **using Copilot**, I leaned on it a lot while building:  
 
-## Learn more
+- Autocompleted **React/TypeScript boilerplate** (hooks, states, props).  
+- Suggested **logic for theme switching and search functionality**.  
+- Helped me debug little issues with UI + state management.  
+- Sometimes gave funny/wrong suggestions 😅 — but that taught me to debug smarter.  
 
-To learn more about developing your project with Expo, look at the following resources:
+Copilot wasn’t just writing code; it felt like a coding buddy ✨.  
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
+## 🎥 Demo
 
-## Join the community
+https://github.com/user-attachments/assets/ba0c074a-17ea-45e1-9b70-85839cfdb62a
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 💡 What I Learned  
+
+- Building a React Expo + TypeScript app from scratch.  
+- How to balance using AI as a helper, not a crutch.  
+- Designing apps that mix **music + mood + aesthetics** into something simple and fun.  
+
+---
+
+✨ **Pixel September Playlist Note** is my September vibe in app form:  
+songs as sticky notes, pixel themes, and a cozy quote every day.  
